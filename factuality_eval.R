@@ -19,7 +19,8 @@ fa_seniority<- readr::read_csv(file.path(data_dir, "factuality_seniority.csv"))
 author_factuality <- fa_author %>%
   filter(result_valid_flag == "valid") %>%
   group_by(task_name) %>%
-  summarise(author_frac = mean(is_in_aps), .groups = "drop")
+  summarise(author_frac = mean(is_in_aps), .groups = "drop") %>% 
+  pivot_wider(names_from = task_name, values_from = author_frac)
 
 author_factuality %>% 
   write_csv("./eval_results/author_factuality.csv")
