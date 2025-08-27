@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Description</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        header {
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 1rem;
+        }
+        section {
+            margin: 2rem;
+        }
+        h2 {
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 2rem;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        code {
+            background-color: #f4f4f4;
+            padding: 4px;
+            border-radius: 4px;
+        }
+        a {
+            color: #0066cc;
+            text-decoration: underline;
+        }
+        a:hover {
+            color: #004499;
+        }
+        .image-container {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        /* Data organization diagram styles */
+        .diagram-container {
+            background: white;
+            padding: 30px;
+            margin: 20px auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            max-width: 900px;
+        }
+        
+        .data-structure {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .folder-section {
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .audit-folder {
+            background-color: #ffe6cc;
+            border: 2px solid #d79b00;
+        }
+        
+        .ground-truth-folder {
+            background-color: #e1d5e7;
+            border: 2px solid #9673a6;
+        }
+        
+        .extra-folder {
+            background-color: #f8f8f8;
+            border: 2px solid #cccccc;
+        }
+        
+        .folder-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .folder-content {
+            font-size: 16px;
+            color: #666;
+            line-height: 1.5;
+        }
+        
+        .emphasis {
+            font-weight: bold;
+            color: #333;
+            font-size: 16px;
+        }
+        
+        figcaption {
+            text-align: center;
+            font-style: italic;
+            color: #666;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        
+        h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .missing-desc {
+            font-style: italic;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Data Description for LLMScholar Audits<br />(Factuality and Similarity Analysis)</h1>
+    </header>
+
+    <!-- Original pipeline diagram -->
+    <br />
+    <figure class="image-container">
+    <img src="pipeline-v0.png" alt="Evaluation pipeline for LLM-based scholar recommendations">
+    <figcaption>Figure: Overview of the evaluation pipeline for LLM-based scholar recommendations. 
+        a) Tasks across different dimensions (e.g., expertise, era, seniority); 
+        b) Prompt engineering (zero-shot, chain-of-thought); 
+        c) Large language models (llama3-8b, llama3.1-8b, gemma2-9b, mixtral-8x7b, llama3-70b, llama3.1-70b); 
+        d) Evaluation modules (e.g., factuality, representation bias); 
+        e) Ground truth comparison using APS and OpenAlex.
+    </figcaption>
+    </figure>
+
+    <!-- Research Questions Section -->
+    <div class="diagram-container">
+        <h3 style="text-align: center; margin-bottom: 30px; color: #4CAF50;">Key Research Questions for Visualization</h3>
+        
+        <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+            <h4 style="color: #d79b00; margin-top: 0;">🎯 Model Performance & Accuracy</h4>
+            <ul style="margin: 10px 0; padding-left: 20px;">
+                <li><strong>Which models excel in different tasks?</strong> → Compare <code>result_valid_flag</code> and factuality scores across <code>model</code> and <code>task_name</code></li>
+                <li><strong>How many fake scientists do models create?</strong> → Use <code>n_author_hallucinations</code> and <code>is_in_aps</code> from similarity and factuality files</li>
+                <li><strong>Do models get the requested details right?</strong> → Check <code>fact_epoch_requested</code>, <code>fact_doi_author_field</code>, <code>fact_seniority_*</code> fields</li>
+            </ul>
+        </div>
+
+        <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+            <h4 style="color: #9673a6; margin-top: 0;">👥 WHO Gets Recommended?</h4>
+            <ul style="margin: 10px 0; padding-left: 20px;">
+                <li><strong>Are minorities fairly represented?</strong> → Compare <code>gender</code> and <code>ethnicity</code> in factuality files vs. ground truth demographics</li>
+                <li><strong>Do models favor famous scholars?</strong> → Use <code>nobel_prize_likelihood</code> and scholarly metrics from <code>authors_stats.csv</code></li>
+                <li><strong>Where do recommended scholars sit in the academic landscape?</strong> → Plot recommendations on <code>authors_PCA.csv</code> (dim1, dim2)</li>
+                <li><strong>How popular are the recommended scholars?</strong> → Examine <code>h_index</code>, <code>cited_by_count</code>, <code>works_count</code> percentiles</li>
+            </ul>
+        </div>
+
+        <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+            <h4 style="color: #d79b00; margin-top: 0;">🔄 Consistency & Patterns</h4>
+            <ul style="margin: 10px 0; padding-left: 20px;">
+                <li><strong>Do models give the same names repeatedly?</strong> → Compare <code>name_similarity</code> and <code>n_unique_names_recommendations</code></li>
+                <li><strong>Does time of day affect recommendations?</strong> → Group by <code>time</code> field and compare outputs</li>
+                <li><strong>Which models are most/least consistent?</strong> → Track <code>run_id</code> patterns across identical <code>task_param</code></li>
+            </ul>
+        </div>
+
+        <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+            <h4 style="color: #9673a6; margin-top: 0;">🤝 Similarity & Networks</h4>
+            <ul style="margin: 10px 0; padding-left: 20px;">
+                <li><strong>How similar are recommended scientists to each other?</strong> → Use <code>scholarly_similarity</code>, <code>career_age_similarity</code> from similarity files</li>
+                <li><strong>Do models recommend collaborators?</strong> → Check <code>coauthors_share</code> and <code>coauthorships_edgelist.txt</code></li>
+                <li><strong>Is there geographic diversity?</strong> → Examine <code>country_of_affiliation_share</code> and <code>institutions_share</code></li>
+            </ul>
+        </div>
+
+        <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; border-left: 5px solid #4CAF50;">
+            <p style="margin: 0; font-style: italic;"><strong>💡 Tip:</strong> Use <code>run_id</code> to link data across all files. Each run represents one model's response to one specific task.</p>
+        </div>
+    </div>
+
+    <!-- Data organization diagram -->
+    <div class="diagram-container">
+        <h3 style="text-align: center; margin-bottom: 30px;">Data Organization Structure</h3>
+        
+        <div class="data-structure">
+            
+            <div class="folder-section audit-folder">
+                <div class="folder-title"><a href="#factuality-section">audit/</a></div>
+                <div class="folder-content">
+                    Main analysis outputs from LLM evaluations:<br><br>
+                    <div class="emphasis">Factuality Analysis:</div>
+                    • <a href="#factuality-author">author</a><br>
+                    • <a href="#factuality-epoch">epoch</a>, <a href="#factuality-field">field</a>, <a href="#factuality-seniority">seniority</a><br><br>
+                    <div class="emphasis">Similarity Analysis:</div>
+                    • <a href="#similarity-files">epoch, field, seniority</a><br>
+                    • <a href="#similarity-files">top_k, twins</a><br><br>
+                    <em>All files linked by run_id</em>
+                </div>
+            </div>
+            
+            <div class="folder-section ground-truth-folder">
+                <div class="folder-title"><a href="#ground-truth-section">ground_truth/</a></div>
+                <div class="folder-content">
+                    Reference data for validation:<br><br>
+                    • <a href="#authors-demographics">author demographics</a><br>
+                    • <a href="#authors-stats">author statistics</a><br>
+                    • <a href="#authors-pca">author PCA embeddings</a><br>
+                    • <a href="#coauthorships">coauthorship network</a><br>
+                    • <a href="#summary-pca">PCA summary</a>
+                </div>
+            </div>
+            
+            <div class="folder-section extra-folder">
+                <div class="folder-title"><a href="#extra-section">extra/</a></div>
+                <div class="folder-content">
+                    Supplementary datasets:<br><br>
+                    • <a href="#disciplines-demographics">discipline demographics</a><br>
+                    • <a href="#nobel-laureates">Nobel laureates</a>
+                </div>
+            </div>
+            
+        </div>
+        
+        <figcaption></figcaption>
+    </div>
+
+    <section id="factuality-section">
+        <h2>Category: Factuality (audit/factuality)</h2>
+        <p>This category assesses the accuracy of the retrieved data, determining whether the authors and auxiliary data returned by the LLM exist and are correctly attributed to the specified scholar.</p>
+
+        <h3 id="factuality-author">File: factuality_author.csv (audit/factuality)</h3>
+        <p>Basic factuality analysis with run metadata and author verification flags. Contains 32,445 rows across all recommendation tasks.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Field Name</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td><code>run_id</code></td><td>Unique identifier linking related analysis runs across files (format: {model}_{task}_{date}_{time}).</td></tr>
+                <tr><td><code>date</code></td><td>Date the task was performed.</td></tr>
+                <tr><td><code>time</code></td><td>Time the task was performed.</td></tr>
+                <tr><td><code>model</code></td><td>The model used for the task.</td></tr>
+                <tr><td><code>task_name</code></td><td>The name of the task performed (e.g., epoch, field, seniority, top_k, twins).</td></tr>
+                <tr><td><code>task_param</code></td><td>Parameters used in the task (e.g., 1950s, PER, early_career, top_5).</td></tr>
+                <tr><td><code>task_attempt</code></td><td>The attempt number (1-3) for each request, as models were allowed up to 3 attempts to generate valid JSON responses.</td></tr>
+                <tr><td><code>result_valid_flag</code></td><td>Indicates whether the result is valid.</td></tr>
+                <tr><td><code>name</code></td><td>The name of the recommended scholar.</td></tr>
+                <tr><td><code>years</code></td><td>Years of activity as reported by the LLM in their response (only populated for epoch tasks, otherwise empty).</td></tr>
+                <tr><td><code>doi</code></td><td>Digital Object Identifier as provided by the LLM in their response (only populated for field tasks, otherwise empty).</td></tr>
+                <tr><td><code>career_age</code></td><td>Career age as estimated by the LLM in their response (only populated for seniority tasks, otherwise empty).</td></tr>
+                <tr><td><code>clean_name</code></td><td>Cleaned name of the author for standardization.</td></tr>
+                <tr><td><code>id_author_oa</code></td><td>Identifier for the author's profile in OpenAlex (only if the author was found among all APS publications).</td></tr>
+                <tr><td><code>is_in_aps</code></td><td>Boolean indicating whether the author was found in the APS database.</td></tr>
+            </tbody>
+        </table>
+
+        <h3 id="factuality-epoch">File: factuality_epoch.csv (audit/factuality)</h3>
+        <p>Factuality assessment focused specifically on temporal expertise claims and epoch accuracy. Contains 2,980 rows.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Field Name</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td><code>run_id</code></td><td>Unique identifier linking related analysis runs across files.</td></tr>
+                <tr><td><code>date</code></td><td>The date of the epoch.</td></tr>
+                <tr><td><code>time</code></td><td>The time of the epoch.</td></tr>
+                <tr><td><code>model</code></td><td>The model used in this epoch.</td></tr>
+                <tr><td><code>task_name</code></td><td>Name of the task performed.</td></tr>
+                <tr><td><code>task_param</code></td><td>Parameters used for the task.</td></tr>
+                <tr><td><code>task_attempt</code></td><td>The attempt number (1-3) for each request, as models were allowed up to 3 attempts to generate valid JSON responses.</td></tr>
+                <tr><td><code>result_valid_flag</code></td><td>Indicates whether the result is valid.</td></tr>
+                <tr><td><code>name</code></td><td>Name of the author.</td></tr>
+                <tr><td><code>years</code></td><td>Number of years the author has been active.</td></tr>
+                <tr><td><code>clean_name</code></td><td>A cleaned version of the author's name.</td></tr>
+                <tr><td><code>id_author_oa</code></td><td>Identifier for the author's profile in OpenAlex.</td></tr>
+                <tr><td><code>year_first_publication</code></td><td>The year of the author's first publication.</td></tr>
+                <tr><td><code>year_last_publication</code></td><td>The year of the author's most recent publication (by Jan 2025).</td></tr>
+                <tr><td><code>fact_epoch_requested</code></td><td>Whether the author's publication period overlaps with the requested period (without considering the period given by the LLM).</td></tr>
+                <tr><td><code>fact_epoch_llm_in_gt</code></td><td>Whether the epoch (period) returned by the LLM is in the epoch of the ground-truth.</td></tr>
+                <tr><td><code>fact_epoch_gt_in_llm</code></td><td>Whether the epoch (period) of the ground-truth is in the epoch returned by the LLM.</td></tr>
+                <tr><td><code>fact_epoch_overlap</code></td><td>Whether the epoch (period) returned by the LLM overlaps with the ground-truth.</td></tr>
+                <tr><td><code>fact_epoch_intersection_length</code></td><td>The length of the intersection between the epochs from the LLM and ground truth.</td></tr>
+                <tr><td><code>fact_epoch_jaccard_sim</code></td><td>The Jaccard similarity of the epochs between LLM and ground truth.</td></tr>
+            </tbody>
+        </table>
+
+        <h3 id="factuality-field">File: factuality_field.csv (audit/factuality)</h3>
+        <p>Factuality assessment focused specifically on field expertise claims and publication verification within disciplines. Contains 3,923 rows.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Field Name</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td><code>run_id</code></td><td>Unique identifier linking related analysis runs across files.</td></tr>
+                <tr><td><code>date</code></td><td>The date the data was recorded.</td></tr>
+                <tr><td><code>time</code></td><td>The time the data was recorded.</td></tr>
+                <tr><td><code>model</code></td><td>The model used for this task.</td></tr>
+                <tr><td><code>task_name</code></td><td>The task name.</td></tr>
+                <tr><td><code>task_param</code></td><td>The task parameters.</td></tr>
+                <tr><td><code>task_attempt</code></td><td><span class="missing-desc">Description needed</span></td></tr>
+                <tr><td><code>result_valid_flag</code></td><td>Flag indicating if the result was valid.</td></tr>
+                <tr><td><code>name</code></td><td>Name of the author.</td></tr>
+                <tr><td><code>doi</code></td><td>DOI of the publication.</td></tr>
+                <tr><td><code>clean_name</code></td><td>Cleaned version of the author's name.</td></tr>
+                <tr><td><code>id_author_oa</code></td><td>Identifier for the author's profile in OpenAlex.</td></tr>
+                <tr><td><code>id_publication_oa</code></td><td>Identifier for the OpenAlex publication (if the publication exists in OpenAlex).</td></tr>
+                <tr><td><code>id_publication_aps</code></td><td>Identifier for the APS publication (if the publication exists in the APS publications).</td></tr>
+                <tr><td><code>domain_name_list</code></td><td>A list of domains associated with the author's publication.</td></tr>
+                <tr><td><code>field_name_list</code></td><td>A list of field names associated with the author's publication.</td></tr>
+                <tr><td><code>subfield_name_list</code></td><td>A list of subfields associated with the author's publication.</td></tr>
+                <tr><td><code>fact_doi_author_field</code></td><td>Indicates whether the DOI exists, belongs to the author, and belongs to the requested field.</td></tr>
+            </tbody>
+        </table>
+
+        <h3 id="factuality-seniority">File: factuality_seniority.csv (audit/factuality)</h3>
+        <p>Factuality assessment focused specifically on career stage and seniority claims. Contains 2,575 rows.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Field Name</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td><code>run_id</code></td><td>Unique identifier linking related analysis runs across files.</td></tr>
+                <tr><td><code>date</code></td><td>The date the data was recorded.</td></tr>
+                <tr><td><code>time</code></td><td>The time the data was recorded.</td></tr>
+                <tr><td><code>model</code></td><td>The model used to perform the task.</td></tr>
+                <tr><td><code>task_name</code></td><td>The name of the task performed.</td></tr>
+                <tr><td><code>task_param</code></td><td>Parameters used in the task.</td></tr>
+                <tr><td><code>task_attempt</code></td><td><span class="missing-desc">Description needed</span></td></tr>
+                <tr><td><code>result_valid_flag</code></td><td>Indicates if the result was valid (True/False).</td></tr>
+                <tr><td><code>name</code></td><td>The author's name.</td></tr>
+                <tr><td><code>career_age</code></td><td>The number of years the author has been in their academic career.</td></tr>
+                <tr><td><code>clean_name</code></td><td>The cleaned version of the author's name.</td></tr>
+                <tr><td><code>id_author_oa</code></td><td>Identifier for the author's OpenAlex profile.</td></tr>
+                <tr><td><code>year_first_publication</code></td><td>The year of the author's first publication.</td></tr>
+                <tr><td><code>year_last_publication</code></td><td>The year of the author's last publication.</td></tr>
+                <tr><td><code>academic_age</code></td><td>The number of years between the author's first and last publication (last - first years of publication).</td></tr>
+                <tr><td><code>age_now</code></td><td>The number of years from the author's first publication until 2025.</td></tr>
+                <tr><td><code>seniority_active</code></td><td>The author's seniority level in academia based on period of activity.</td></tr>
+                <tr><td><code>seniority_now</code></td><td>The author's seniority at the current time.</td></tr>
+                <tr><td><code>seniority_llm</code></td><td>The seniority as predicted by the LLM.</td></tr>
+                <tr><td><code>fact_seniority_active</code></td><td>Indicates if the seniority is fact-checked in active status.</td></tr>
+                <tr><td><code>fact_seniority_now</code></td><td>Indicates if the seniority is fact-checked at the current time.</td></tr>
+                <tr><td><code>fact_seniority_active_requested</code></td><td>Indicates if seniority was requested to be checked in active status.</td></tr>
+                <tr><td><code>fact_seniority_now_requested</code></td><td>Indicates if seniority was requested to be checked at the current time.</td></tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section>
+        <h2>Category: Similarity (audit/similarity)</h2>
+        <p>This category measures the similarity across various metrics, focusing on how similar the recommended authors are to each other and the requestor. All similarity files share the same structure with consistent metrics across tasks.</p>
+
+        <h3 id="similarity-files">Files: similarity_epoch.csv, similarity_field.csv, similarity_seniority.csv, similarity_top_k.csv, similarity_twins.csv (audit/similarity)</h3>
+        <p>These files contain consistent similarity metrics across all task types, enabling comparative analysis of recommendation patterns.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Field Name</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td><code>run_id</code></td><td>Unique identifier linking related analysis runs across files.</td></tr>
+                <tr><td><code>model</code></td><td>Identifier of the recommendation model used.</td></tr>
+                <tr><td><code>task_name</code></td><td>Name of the evaluation task.</td></tr>
+                <tr><td><code>task_param</code></td><td>Parameters specific to the evaluation task.</td></tr>
+                <tr><td><code>date</code></td><td>Date when the task was executed.</td></tr>
+                <tr><td><code>time</code></td><td>Time when the task was executed.</td></tr>
+                <tr><td><code>n_name_recommendations</code></td><td>Total number of names recommended.</td></tr>
+                <tr><td><code>n_unique_names_recommendations</code></td><td>Number of unique names in the recommendations.</td></tr>
+                <tr><td><code>n_unique_author_recommendations</code></td><td>Number of distinct authors recommended.</td></tr>
+                <tr><td><code>n_author_hallucinations</code></td><td>Number of recommended authors not found in reference data.</td></tr>
+                <tr><td><code>name_similarity</code></td><td>Similarity score between recommended and target names.</td></tr>
+                <tr><td><code>gender_diversity</code></td><td>Diversity index based on gender of recommended authors.</td></tr>
+                <tr><td><code>ethnicity_diversity</code></td><td>Diversity index based on ethnicity of recommended authors.</td></tr>
+                <tr><td><code>aps_scholarly_similarity</code></td><td>Scholarly similarity score using APS data.</td></tr>
+                <tr><td><code>oa_scholarly_similarity</code></td><td>Scholarly similarity score using OpenAlex data.</td></tr>
+                <tr><td><code>scholarly_similarity</code></td><td>Combined scholarly similarity score.</td></tr>
+                <tr><td><code>aps_career_age_similarity</code></td><td>Career age similarity score using APS data.</td></tr>
+                <tr><td><code>oa_career_age_similarity</code></td><td>Career age similarity score using OpenAlex data.</td></tr>
+                <tr><td><code>career_age_similarity</code></td><td>Combined career age similarity score.</td></tr>
+                <tr><td><code>institutions_share</code></td><td>Proportion of institutional overlap between recommended and reference authors.</td></tr>
+                <tr><td><code>country_of_affiliation_share</code></td><td>Proportion of country overlap between recommended and reference authors.</td></tr>
+                <tr><td><code>coauthors_share</code></td><td>Proportion of shared coauthors with target authors.</td></tr>
+                <tr><td><code>coauthors_recommended_share</code></td><td>Share of recommended authors who have coauthored with each other.</td></tr>
+                <tr><td><code>recommended_author_pairs_are_coauthors</code></td><td>Boolean indicator whether all recommended pairs are coauthors.</td></tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section id="ground-truth-section">
+        <h2>Category: Reference Data (ground_truth/)</h2>
+        <p>This category contains reference datasets used for validation and ground truth comparisons in the LLM scholar recommendation analysis.</p>
+
+        <h3 id="authors-demographics">File: authors_demographics.csv (ground_truth/)</h3>
+        <p>Demographic information and name variants for authors in the reference database.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Field Name</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td><code>id_author_oa</code></td><td>Identifier for the author's profile in OpenAlex.</td></tr>
+                <tr><td><code>display_name</code></td><td>Primary display name for the author.</td></tr>
+                <tr><td><code>orcid</code></td><td>Open Researcher and Contributor ID - a unique persistent identifier for researchers.</td></tr>
+                <tr><td><code>alternative_names</code></td><td>List of alternative names for the author.</td></tr>
+                <tr><td><code>longest_name</code></td><td>The longest version of the author's name.</td></tr>
+                <tr><td><code>last_name</code></td><td>Author's last name.</td></tr>
+                <tr><td><code>first_name</code></td><td>Author's first name.</td></tr>
+                <tr><td><code>ethnicity</code></td><td>Perceived ethnicity inferred from names using automated tools (demographicx and ethnicolr), categorized as Asian, White, Latino, Black, or Unknown.</td></tr>
+                <tr><td><code>gender</code></td><td>Perceived gender inferred from names using gender-guesser tool, categorized as Male, Female, Neutral, or Unknown.</td></tr>
+                <tr><td><code>nobel_prize_likelihood</code></td><td>Predicted likelihood of the author being a Nobel Prize winner.</td></tr>
+            </tbody>
+        </table>
+
+        <h3 id="authors-stats">File: authors_stats.csv (ground_truth/)</h3>
+        <p>Comprehensive scholarly metrics and rankings for authors from both APS and OpenAlex databases.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Field Name</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td><code>id_author_oa</code></td><td>Identifier for the author's profile in OpenAlex.</td></tr>
+                <tr><td><code>orcid</code></td><td>Open Researcher and Contributor ID - a unique persistent identifier for researchers.</td></tr>
+                <tr><td><code>aps_works_count</code></td><td>Number of works in the APS database.</td></tr>
+                <tr><td><code>aps_cited_by_count</code></td><td>Citation count from APS database.</td></tr>
+                <tr><td><code>aps_h_index</code></td><td>H-index calculated from APS data.</td></tr>
+                <tr><td><code>aps_i10_index</code></td><td>i10-index calculated from APS data.</td></tr>
+                <tr><td><code>aps_e_index</code></td><td>e-index calculated from APS data.</td></tr>
+                <tr><td><code>aps_years_of_activity</code></td><td>Years of activity based on APS publications.</td></tr>
+                <tr><td><code>aps_career_age</code></td><td>Career age based on APS data.</td></tr>
+                <tr><td><code>aps_citations_per_paper_age</code></td><td>Citations per paper normalized by career age from APS.</td></tr>
+                <tr><td><code>career_age</code></td><td>Career age based on OpenAlex data.</td></tr>
+                <tr><td><code>citations_per_paper_age</code></td><td>Citations per paper normalized by career age from OpenAlex.</td></tr>
+                <tr><td><code>cited_by_count</code></td><td>Citation count from OpenAlex database.</td></tr>
+                <tr><td><code>e_index</code></td><td>e-index calculated from OpenAlex data.</td></tr>
+                <tr><td><code>h_index</code></td><td>H-index calculated from OpenAlex data.</td></tr>
+                <tr><td><code>i10_index</code></td><td>i10-index calculated from OpenAlex data.</td></tr>
+                <tr><td><code>max_year</code></td><td>Year of most recent publication.</td></tr>
+                <tr><td><code>min_year</code></td><td>Year of first publication.</td></tr>
+                <tr><td><code>two_year_mean_citedness</code></td><td>Average citations over the past two years.</td></tr>
+                <tr><td><code>works_count</code></td><td>Number of works in OpenAlex database.</td></tr>
+                <tr><td><code>rr1_rank_publications</code></td><td>Rank based on number of publications.</td></tr>
+                <tr><td><code>rr1_rank_publications_percentile</code></td><td>Percentile rank based on number of publications.</td></tr>
+                <tr><td><code>rr2_rank_citations</code></td><td>Rank based on total citations.</td></tr>
+                <tr><td><code>rr2_rank_citations_percentile</code></td><td>Percentile rank based on total citations.</td></tr>
+                <tr><td><code>rr3_rank_h_index</code></td><td>Rank based on H-index.</td></tr>
+                <tr><td><code>rr3_rank_h_index_percentile</code></td><td>Percentile rank based on H-index.</td></tr>
+                <tr><td><code>rr4_rank_i10_index</code></td><td>Rank based on i10-index.</td></tr>
+                <tr><td><code>rr4_rank_i10_index_percentile</code></td><td>Percentile rank based on i10-index.</td></tr>
+                <tr><td><code>rr5_rank_e_index</code></td><td>Rank based on e-index.</td></tr>
+                <tr><td><code>rr5_rank_e_index_percentile</code></td><td>Percentile rank based on e-index.</td></tr>
+                <tr><td><code>rr6_rank_citation_publication_age</code></td><td>Rank based on citation per publication age.</td></tr>
+                <tr><td><code>rr6_rank_citation_publication_age_percentile</code></td><td>Percentile rank based on citation per publication age.</td></tr>
+                <tr><td><code>rr7_rank_mean_citedness_2yr</code></td><td>Rank based on two-year mean citedness.</td></tr>
+                <tr><td><code>rr7_rank_mean_citedness_2yr_percentile</code></td><td>Percentile rank based on two-year mean citedness.</td></tr>
+            </tbody>
+        </table>
+
+        <h3 id="authors-pca">File: authors_PCA.csv (ground_truth/)</h3>
+        <p>Principal Component Analysis embeddings for authors based on their scholarly metrics.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Field Name</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td><code>id_author_oa</code></td><td>Identifier for the author's profile in OpenAlex.</td></tr>
+                <tr><td><code>dim1</code></td><td>First principal component dimension.</td></tr>
+                <tr><td><code>dim2</code></td><td>Second principal component dimension.</td></tr>
+            </tbody>
+        </table>
+
+        <h3 id="coauthorships">File: coauthorships_edgelist.txt (ground_truth/)</h3>
+        <p>Coauthorship network represented as an edge list connecting collaborating authors.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Field Name</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td><code>author1</code></td><td>OpenAlex ID of the first author in the collaboration.</td></tr>
+                <tr><td><code>author2</code></td><td>OpenAlex ID of the second author in the collaboration.</td></tr>
+            </tbody>
+        </table>
+
+        <h3 id="summary-pca">File: summary_PCA.csv (ground_truth/)</h3>
+        <p>Summary statistics showing how different scholarly metrics contribute to the principal components.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Field Name</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td><code>PC1</code></td><td>Contribution of each metric to the first principal component.</td></tr>
+                <tr><td><code>PC2</code></td><td>Contribution of each metric to the second principal component.</td></tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section id="extra-section">
+        <h2>Category: Supplementary Data (extra/)</h2>
+        <p>This category contains additional datasets that provide supplementary context for the analysis.</p>
+
+        <h3 id="disciplines-demographics">File: disciplines_aps_author_demographics.csv (extra/)</h3>
+        <p>Demographic statistics by academic discipline based on APS author data. Note: This file has a complex structure with numbered columns for different demographic categories.</p>
+        <p><em>Detailed column structure analysis needed - file contains multiple numbered columns for gender and ethnicity statistics.</em></p>
+
+        <h3 id="nobel-laureates">File: nobel-prize-laureates.csv (extra/)</h3>
+        <p>Comprehensive information about Nobel Prize laureates including biographical and award details.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Field Name</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td><code>Id</code></td><td>Unique identifier for the laureate.</td></tr>
+                <tr><td><code>Firstname</code></td><td>First name of the laureate.</td></tr>
+                <tr><td><code>Surname</code></td><td>Surname of the laureate.</td></tr>
+                <tr><td><code>Born</code></td><td>Birth year of the laureate.</td></tr>
+                <tr><td><code>Died</code></td><td>Death year of the laureate (if applicable).</td></tr>
+                <tr><td><code>Born country</code></td><td>Country where the laureate was born.</td></tr>
+                <tr><td><code>Born country code</code></td><td>ISO country code for birth country.</td></tr>
+                <tr><td><code>Born city</code></td><td>City where the laureate was born.</td></tr>
+                <tr><td><code>Died country</code></td><td>Country where the laureate died.</td></tr>
+                <tr><td><code>Died country code</code></td><td>ISO country code for death country.</td></tr>
+                <tr><td><code>Died city</code></td><td>City where the laureate died.</td></tr>
+                <tr><td><code>Gender</code></td><td>Gender of the laureate.</td></tr>
+                <tr><td><code>Year</code></td><td>Year the Nobel Prize was awarded.</td></tr>
+                <tr><td><code>Category</code></td><td>Nobel Prize category (Physics, Chemistry, etc.).</td></tr>
+                <tr><td><code>Overall motivation</code></td><td>General motivation for the award.</td></tr>
+                <tr><td><code>Motivation</code></td><td>Specific motivation for the award.</td></tr>
+                <tr><td><code>Organization name</code></td><td>Name of the affiliated organization.</td></tr>
+                <tr><td><code>Organization city</code></td><td>City of the affiliated organization.</td></tr>
+                <tr><td><code>Organization country</code></td><td>Country of the affiliated organization.</td></tr>
+                <tr><td><code>Geo Shape</code></td><td>Geographic shape data.</td></tr>
+                <tr><td><code>Geo Point 2D</code></td><td>Geographic coordinate point.</td></tr>
+            </tbody>
+        </table>
+    </section>
+
+</body>
+</html>
