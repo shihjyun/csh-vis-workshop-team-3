@@ -4,7 +4,7 @@
 
 <div class="container">
 	<div class="bg-wrapper">
-		<img width="100%" src="/bg-image.jpg" />
+		<!-- <img width="100%" src="/bg-image.jpg" /> -->
 		<Annotation></Annotation>
 	</div>
 </div>
@@ -17,7 +17,6 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		background: black;
 	}
 	.bg-wrapper {
 		aspect-ratio: 4 / 3;
