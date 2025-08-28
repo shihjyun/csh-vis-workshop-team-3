@@ -33,7 +33,7 @@
 		justify-content: center;
 	}
 	.bg-wrapper {
-		aspect-ratio: 4 / 3;
+		aspect-ratio: 1667 / 1203;
 		width: 100%;
 		position: relative;
 	}
