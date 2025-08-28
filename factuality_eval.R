@@ -146,9 +146,6 @@ epoch_overall %>%
 # One convenience flag:
 #   - fact_match_requested = TRUE if either frame (Then or Now) satisfies the request.
 
-fa_seniority %>% 
-  count(task_param)
-
 sen_eval <- fa_seniority %>%
   filter(result_valid_flag == "valid") %>%
   mutate(
@@ -181,3 +178,20 @@ sen_overall <- sen_eval %>%
 
 sen_overall %>% 
   write_csv("./eval_results/seniority_factuality.csv")
+
+# ---------- Summary view ----------
+bind_rows(
+  author_factuality %>% 
+    pivot_longer(everything(), names_to = "task_name", values_to = "author_frac") %>% 
+    mutate(dimension = "author"),
+  field_adf %>% 
+    pivot_longer(everything(), names_to = "task_name", values_to = "author_frac") %>% 
+    mutate(dimension = "field"),
+  sen_overall %>% 
+    pivot_longer(everything(), names_to = "task_name", values_to = "author_frac") %>% 
+    mutate(dimension = "seniority"),
+  epoch_overall %>% 
+    pivot_longer(everything(), names_to = "task_name", values_to = "author_frac") %>% 
+    mutate(dimension = "epoch"),
+) %>% 
+  write_csv("./eval_results/all_factuality_summary.csv")
