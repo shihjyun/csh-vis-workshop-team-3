@@ -9,11 +9,11 @@
 	onMount(() => {
 		gsap.registerPlugin(DrawSVGPlugin);
 		const paths = document.querySelectorAll('#story-1 path');
-		const tl = gsap.timeline();
+		const tl = gsap.timeline({ repeat: -1, delay: 2 });
 		tl.from(paths, {
-			duration: 0.3,
+			duration: 0.2,
 			drawSVG: 0,
-			stagger: 0.3,
+			stagger: 0.2,
 			ease: 'power1.inOut'
 		});
 	});
