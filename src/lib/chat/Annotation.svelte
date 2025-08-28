@@ -2,8 +2,14 @@
 	import { onMount } from 'svelte';
 	import { gsap } from 'gsap';
 	import { DrawSVGPlugin } from 'gsap/dist/DrawSVGPlugin';
+	import StoryImages from './svgs/StoryImages.svelte';
 	import Story1 from './svgs/Story1.svelte';
 	import Story2 from './svgs/Story2.svelte';
+
+	export let imgsConfig;
+
+	export let wrapperWidth;
+	export let wrapperHeight;
 
 	// import { draw } from 'svelte/transition';
 	// import { quintOut } from 'svelte/easing';
@@ -28,6 +34,8 @@
 			},
 			'+=0.5'
 		);
+		tl.to('#img_1', { opacity: 1, duration: 0.5 }, '+=0.5');
+		tl.to('#img_2', { opacity: 1, duration: 0.5 }, '+=0.5');
 	});
 </script>
 
@@ -41,6 +49,8 @@
 	<Story1 />
 	<Story2 />
 </svg>
+
+<StoryImages {imgsConfig} {wrapperWidth} {wrapperHeight}></StoryImages>
 
 <style>
 	svg {

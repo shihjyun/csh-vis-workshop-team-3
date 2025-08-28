@@ -1,11 +1,25 @@
 <script>
 	import Annotation from './Annotation.svelte';
+	import { onMount } from 'svelte';
+	import { json } from 'd3';
+
+	let imgsConfig;
+
+	let wrapperWidth = 0;
+	let wrapperHeight = 0;
+
+	onMount(async () => {
+		const response = await fetch('/imgs-config.json');
+		imgsConfig = await response.json();
+	});
 </script>
 
 <div class="container">
-	<div class="bg-wrapper">
+	<div class="bg-wrapper" bind:clientWidth={wrapperWidth} bind:clientHeight={wrapperHeight}>
 		<!-- <img width="100%" src="/bg-image.jpg" /> -->
-		<Annotation></Annotation>
+		{#if imgsConfig}
+			<Annotation {imgsConfig} {wrapperWidth} {wrapperHeight}></Annotation>
+		{/if}
 	</div>
 </div>
 
